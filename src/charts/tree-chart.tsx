@@ -204,7 +204,7 @@ const TreeNode: React.FC<{ data: CustomNodeData }> = ({ data }) => {
 
         />
       )}
-      <div className="truncate w-full">{data.label}</div>
+      <div className="truncate w-full text-xs">{data.label}</div>
       {data.hasChildren && (
         <Handle
           type="source"
