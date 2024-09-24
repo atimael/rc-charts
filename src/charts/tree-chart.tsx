@@ -1,65 +1,3 @@
-// import { ReactFlow, ConnectionLineType } from "@xyflow/react";
-// import dagre from "dagre";
-//
-// import { initialNodes, initialEdges } from "./tree-chart-data.js";
-//
-// import "@xyflow/react/dist/style.css";
-//
-// const dagreGraph = new dagre.graphlib.Graph();
-// dagreGraph.setDefaultEdgeLabel(() => ({}));
-//
-// const nodeWidth = 172;
-// const nodeHeight = 36;
-//
-// const getLayoutedElements = (nodes, edges, direction = "TB") => {
-//   const isHorizontal = direction === "LR";
-//   dagreGraph.setGraph({ rankdir: direction });
-//
-//   nodes.forEach((node) => {
-//     dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
-//   });
-//
-//   edges.forEach((edge) => {
-//     dagreGraph.setEdge(edge.source, edge.target);
-//   });
-//
-//   dagre.layout(dagreGraph);
-//
-//   const newNodes = nodes.map((node) => {
-//     const nodeWithPosition = dagreGraph.node(node.id);
-//     const newNode = {
-//       ...node,
-//       targetPosition: isHorizontal ? "left" : "top",
-//       sourcePosition: isHorizontal ? "right" : "bottom",
-//       // We are shifting the dagre node position (anchor=center center) to the top left
-//       // so it matches the React Flow node anchor point (top left).
-//       position: {
-//         x: nodeWithPosition.x - nodeWidth / 2,
-//         y: nodeWithPosition.y - nodeHeight / 2,
-//       },
-//     };
-//
-//     return newNode;
-//   });
-//
-//   return { nodes: newNodes, edges };
-// };
-//
-// const { nodes, edges } = getLayoutedElements(initialNodes, initialEdges);
-//
-// const LayoutFlow = () => {
-//   return (
-//     <ReactFlow
-//       nodes={nodes}
-//       edges={edges}
-//       connectionLineType={ConnectionLineType.SmoothStep}
-//       fitView
-//     />
-//   );
-// };
-//
-// export default LayoutFlow;
-
 import { ReactFlow, ConnectionLineType, Handle, Position } from "@xyflow/react";
 import dagre from "dagre";
 import { treeData } from "./tree-chart-data.tsx";
@@ -111,7 +49,7 @@ function traverseTree(
 
   nodes.push({
     id,
-    type: depth === 1 ? "circle" : "custom",
+    type: depth === 0 ? "dot" : depth === 1 ? "circle" : "custom",
     data: {
       label: node.name,
       hasChildren: !!node.children?.length,
@@ -128,7 +66,11 @@ function traverseTree(
       id: `e${parentId}-${id}`,
       source: parentId,
       target: id,
-      type: edgeType,
+      type: depth === 1 ? "bezier" : edgeType,
+      style: {
+        strokeWidth: 4,
+        stroke: color || "#000",
+      },
     });
   }
 
@@ -156,11 +98,12 @@ const { nodes: initialNodes, edges: initialEdges } = traverseTree(treeData);
 const getLayoutedElements = (nodes, edges, direction = "TB") => {
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
-  const isHorizontal = direction === "LR";
   dagreGraph.setGraph({ rankdir: direction });
 
   nodes.forEach((node) => {
-    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+    const width = node.data.depth === 0 ? 10 : nodeWidth;
+    const height = node.data.depth === 0 ? 10 : nodeHeight;
+    dagreGraph.setNode(node.id, { width, height });
   });
 
   edges.forEach((edge) => {
@@ -171,13 +114,17 @@ const getLayoutedElements = (nodes, edges, direction = "TB") => {
 
   let newNodes = nodes.map((node) => {
     const nodeWithPosition = dagreGraph.node(node.id);
+    const width = node.data.depth === 0 ? 10 : nodeWidth;
+    const height = node.data.depth === 0 ? 10 : nodeHeight;
     return {
       ...node,
-      targetPosition: isHorizontal ? "left" : "top",
-      sourcePosition: isHorizontal ? "right" : "bottom",
+      targetPosition: node.data.depth === 0
+        ? undefined
+        : Position.Top,
+      sourcePosition: Position.Bottom,
       position: {
-        x: nodeWithPosition.x - nodeWidth / 2,
-        y: nodeWithPosition.y - nodeHeight / 2,
+        x: nodeWithPosition.x - width / 2,
+        y: (nodeWithPosition.y - height / 2) - (node.depth === 0 ? 200 : node.depth < 2 ? 100 : 0),
       },
     };
   });
@@ -224,8 +171,8 @@ const CircleNode: React.FC<{ data: CustomNodeData }> = ({ data }) => {
         <Handle
           type="target"
           position={Position.Top}
-          style={{ background: "#555" }}
           isConnectable={false}
+          style={{ background: data.color }}
         />
       )}
       <div className="truncate w-full">{data.label}</div>
@@ -233,8 +180,8 @@ const CircleNode: React.FC<{ data: CustomNodeData }> = ({ data }) => {
         <Handle
           type="source"
           position={Position.Bottom}
-          style={{ background: "#555" }}
           isConnectable={false}
+          style={{ background: data.color }}
         />
       )}
     </div>
@@ -252,8 +199,9 @@ const TreeNode: React.FC<{ data: CustomNodeData }> = ({ data }) => {
         <Handle
           type="target"
           position={Position.Top}
-          style={{ background: "#555" }}
           isConnectable={false}
+          style={{ background: data.color }}
+
         />
       )}
       <div className="truncate w-full">{data.label}</div>
@@ -261,15 +209,34 @@ const TreeNode: React.FC<{ data: CustomNodeData }> = ({ data }) => {
         <Handle
           type="source"
           position={Position.Bottom}
-          style={{ background: "#555" }}
           isConnectable={false}
+          style={{ background: data.color }}
         />
       )}
     </div>
   );
 };
 
-const nodeTypes = { custom: TreeNode, circle: CircleNode };
+const DotNode = ({ data }) => {
+  return (
+    <div
+      style={{
+        width: 10,
+        height: 10,
+        position: "relative",
+      }}
+    >
+      <Handle
+        className="bg-transparent "
+        type="source"
+        position={Position.Bottom}
+        isConnectable={false}
+      />
+    </div>
+  );
+};
+
+const nodeTypes = { custom: TreeNode, circle: CircleNode, dot: DotNode};
 
 const LayoutFlow = () => {
   return (
