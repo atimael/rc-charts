@@ -1,11 +1,13 @@
-import { TreeChartOld } from "./charts/tree-chart-old.tsx";
-import LayoutFlow from "./charts/tree-chart.tsx";
+import { TreeViewChart } from "./tree-chart/TreeViewChart.tsx";
+import { ReactFlowProvider } from "@xyflow/react";
 
 function App() {
   return (
     <div className="h-full bg-white">
       {/*<TreeChartOld/>*/}
-      <LayoutFlow />
+      <ReactFlowProvider>
+        <TreeViewChart />
+      </ReactFlowProvider>
     </div>
   );
 }
