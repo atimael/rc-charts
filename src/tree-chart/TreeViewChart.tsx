@@ -27,9 +27,12 @@ export const TreeViewChart = () => {
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
-                draggable={false}
                 nodeTypes={nodeTypes}
                 connectionLineType={ConnectionLineType.SmoothStep}
+                nodesDraggable={false}
+                nodesConnectable={false}
+                elementsSelectable={false}
+                draggable={false}
                 panOnDrag={false}
                 proOptions={{ hideAttribution: true }}
                 fitView

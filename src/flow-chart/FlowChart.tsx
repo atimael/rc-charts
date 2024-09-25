@@ -93,7 +93,7 @@ export const CallJourney: React.FC = () => {
           id: `e${stage.id}-${nextNodeId}`,
           source: stage.id,
           target: nextNodeId,
-          animated: true,
+          animated: false,
           type: isCrossRow ? 'bezier' : 'straight',
           label: stagesData[index + 1].duration,
           style: isCrossRow ? { strokeWidth: 2, stroke: '#888', padding: "20px" } : undefined,
@@ -111,13 +111,14 @@ export const CallJourney: React.FC = () => {
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        fitView
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}
+        draggable={false}
+        panOnDrag={false}
+        proOptions={{ hideAttribution: true }}
+        fitView
       >
-        <MiniMap />
-        <Controls />
         <Background />
       </ReactFlow>
     </div>
