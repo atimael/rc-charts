@@ -1,17 +1,14 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {  useEffect, useMemo, useRef, useState } from "react";
 import {
   ReactFlow,
-  MiniMap,
-  Controls,
+
   Background,
   Edge,
-  useNodesState,
-  useEdgesState,
-  addEdge,
-  Connection, Position
+  Position, BaseEdge
 } from "@xyflow/react";
 
 import "@xyflow/react/dist/style.css";
+import { CurvedEdge } from "./components/CurvedEdge.tsx";
 
 interface StageData {
   id: string;
@@ -81,7 +78,6 @@ export const CallJourney: React.FC = () => {
 
     const generatedEdges = stagesData.reduce<Edge[]>((acc, stage, index) => {
       const nextNodeId = stagesData[index + 1]?.id;
-      const rowLimitReached = (index + 1) % rowLimit === 0;
       const currentRow = Math.floor(index / rowLimit);
       const nextRow = Math.floor((index + 1) / rowLimit);
 
@@ -106,11 +102,16 @@ export const CallJourney: React.FC = () => {
     return { nodes: generatedNodes, edges: generatedEdges };
   }, [containerWidth]);
 
+  const edgeTypes = {
+    curved: CurvedEdge,
+  };
+
   return (
     <div style={{ height: '100vh' }} ref={containerRef}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        edgeTypes={edgeTypes}
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}

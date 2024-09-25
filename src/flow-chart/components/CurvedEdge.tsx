@@ -1,6 +1,6 @@
 import { BaseEdge, EdgeProps } from '@xyflow/react';
 
-export default function SelfConnecting(props: EdgeProps) {
+export const CurvedEdge = (props: EdgeProps) => {
 
   const { sourceX, sourceY, targetX, targetY, id, markerEnd } = props;
   const radiusX = (sourceX - targetX) * 0.6;
