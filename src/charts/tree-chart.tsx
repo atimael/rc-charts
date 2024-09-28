@@ -66,7 +66,7 @@ function traverseTree(
       id: `e${parentId}-${id}`,
       source: parentId,
       target: id,
-      type: depth === 1 ? "bezier" : edgeType,
+      type: depth === 1 ? ConnectionLineType.Bezier : edgeType,
       style: {
         strokeWidth: 4,
         stroke: color || "#000",
