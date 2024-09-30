@@ -9,6 +9,7 @@ import {
 
 import "@xyflow/react/dist/style.css";
 import { CurvedEdge } from "./components/CurvedEdge.tsx";
+import { StageNode } from "./components/StageNode.tsx";
 
 interface StageData {
   id: string;
@@ -34,9 +35,11 @@ const stagesData: StageData[] = [
   { id: "15", label: "Hangup", duration: "3.2 Min" },
 ];
 
+const nodeTypes = { stage: StageNode };
+
 const nodeWidth = 100;
-const nodeHeight = 60;
-const nodeMargin = 100;
+const nodeHeight = 100;
+const nodeMargin = 150;
 
 export const CallJourney: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -77,6 +80,7 @@ export const CallJourney: React.FC = () => {
         sourcePosition: isEvenRow ? Position.Right : Position.Left,
         targetPosition: isEvenRow ? Position.Left : Position.Right,
         style: { width: nodeWidth, height: nodeHeight },
+        type: "stage",
       };
     });
 
@@ -114,6 +118,7 @@ export const CallJourney: React.FC = () => {
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         nodesDraggable={false}
         nodesConnectable={false}
